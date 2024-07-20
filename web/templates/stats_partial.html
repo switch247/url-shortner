@@ -1,0 +1,41 @@
+{{ define "stats_partial.html" }}
+
+<div id="stats" class="bg-white p-4 rounded shadow">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold mb-3">Recent Clicks</h2>
+            <div class="space-x-2">
+                <a href="{{ printf "/%s+" .ShortCode }}" target="_blank" rel="noopener" class="px-2 py-1 bg-blue-600 text-white rounded text-sm">Open Full Stats</a>
+                <button onclick="navigator.clipboard.writeText('{{ printf "%s/%s" .AppDomain .ShortCode }}')" class="px-2 py-1 bg-gray-100 rounded text-sm">Copy Link</button>
+            </div>
+        </div>
+
+        <p class="mb-4">Total Clicks: <strong>{{ .ClickCount }}</strong></p>
+
+    {{ if not .Clicks }}
+        <p class="text-gray-500">No clicks recorded yet.</p>
+    {{ else }}
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead class="border-b bg-gray-50">
+                <tr>
+                    <th class="py-2 px-2">Referrer</th>
+                    <th class="py-2 px-2">User Agent</th>
+                    <th class="py-2 px-2">Time</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{ range .Clicks }}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-2 px-2 align-top">{{ if .Referrer }}{{ slice .Referrer 0 80 }}{{ else }}—{{ end }}</td>
+                    <td class="py-2 px-2 align-top">{{ if .UserAgent }}{{ slice .UserAgent 0 80 }}{{ else }}—{{ end }}</td>
+                    <td class="py-2 px-2 align-top">{{ .CreatedAt }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+        </div>
+    {{ end }}
+</div>
+
+{{ end }}

@@ -1,0 +1,40 @@
+{{ define "title" }}All URLs Analytics{{ end }}
+
+{{ define "content" }}
+<h1 class="text-3xl font-bold mb-4">Analytics for All URLs</h1>
+
+{{ range .Stats }}
+<div class="bg-white p-4 rounded shadow mb-4">
+  <p class="mb-1"><strong>Short URL:</strong>
+    <a href="{{ printf "%s/%s" $.AppDomain .ID }}" class="text-blue-600 break-all">{{ printf "%s/%s" $.AppDomain .ID }}</a>
+  </p>
+  <p class="mb-1"><strong>Destination:</strong> <span class="break-all">{{ .LongURL }}</span></p>
+  <p class="mb-1"><strong>Total Clicks:</strong> {{ .ClickCount }}</p>
+  <div class="mt-3 flex items-center gap-2">
+    <button
+      hx-get="{{ printf "/stats/%s" .ID }}"
+      hx-trigger="load, every 5s"
+      hx-target="{{ printf "#stats-%s" .ID }}"
+      hx-swap="outerHTML"
+      hx-indicator="{{ printf "#loading-%s" .ID }}"
+      class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 text-sm"
+      aria-controls="{{ printf "stats-%s" .ID }}"
+    >
+      View Inline Stats
+    </button>
+
+    <a href="{{ printf "/%s+" .ID }}" target="_blank" rel="noopener" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Open Full Stats</a>
+  </div>
+
+  <!-- inline stats container (loaded via HTMX) -->
+  <div id="{{ printf "stats-%s" .ID }}" class="mt-3">
+    <span id="{{ printf "loading-%s" .ID }}" class="htmx-indicator text-sm text-gray-500">Loading stats...</span>
+  </div>
+</div>
+{{ else }}
+<p class="text-gray-500">No URLs found.</p>
+{{ end }}
+
+{{ end }}
+
+{{ template "base" . }}

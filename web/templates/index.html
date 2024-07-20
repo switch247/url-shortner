@@ -1,0 +1,42 @@
+{{ define "title" }}Home — {{ with .AppName }}{{.}}{{else}}tiny.cloud{{end}}{{ end }}
+
+{{ define "content" }}
+<div class="min-h-full flex items-center justify-center py-12">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <h1 class="text-5xl font-bold">{{ with .AppName }}{{.}}{{else}}tiny.cloud{{end}}</h1>
+      <p class="mt-4 text-gray-600">Shorten URLs. Track every click.</p>
+    </div>
+
+    <div class="max-w-md w-full space-y-8">
+      <form
+        hx-post="/shorten"
+        hx-target="#result"
+        hx-swap="outerHTML"
+        hx-indicator="#spinner"
+        class="space-y-4"
+      >
+        <input
+          name="url"
+          type="url"
+          required
+          placeholder="https://very-long-url.com/..."
+          class="w-full px-5 py-4 rounded-xl border border-gray-300 text-lg"
+        />
+        <button
+          type="submit"
+          class="w-full bg-black text-white py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 flex items-center justify-center"
+        >
+          <span>Shorten URL</span>
+          <span id="spinner" class="htmx-indicator ml-3">Loading...</span>
+        </button>
+      </form>
+
+      <!-- This gets replaced by HTMX -->
+      <div id="result"></div>
+    </div>
+  </div>
+</div>
+{{ end }}
+
+{{ template "base" . }}
