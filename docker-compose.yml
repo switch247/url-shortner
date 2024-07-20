@@ -1,0 +1,64 @@
+# docker-compose.yml — FINAL VERSION (supports BOTH modes)
+version: '3.9'
+
+services:
+  # === GO APP (can run inside OR outside Docker) ===
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # When running INSIDE Docker → use service names
+      DATABASE_URL: postgres://postgres:password@tiny_db:5432/tinyurl?sslmode=disable
+      REDIS_URL: redis://tiny_redis:6379
+      ENV: production
+    depends_on:
+      tiny_db:
+        condition: service_healthy
+      tiny_redis:
+        condition: service_started
+    volumes:
+      - .:/app                    # ← Enables live code sync (optional)
+    # Remove this line if you want hot reload inside container
+    # command: ["air", "-c", ".air.toml"]  # uncomment for live reload inside container
+
+  # === POSTGRES (Docker only) ===
+  tiny_db:
+    container_name: tiny_db
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: tinyurl
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"                       # ← Accessible from Windows as localhost:5434
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tinyurl"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # === REDIS (Docker only) ===
+  tiny_redis:
+    container_name: tiny_redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  # === OPTIONAL: pgAdmin (browser GUI) ===
+  pgadmin:
+    container_name: tiny_pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@tiny.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    depends_on:
+      - tiny_db
